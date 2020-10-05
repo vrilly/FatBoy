@@ -24,10 +24,16 @@
                 </MenuItem>
                 <MenuItem Header="_Image">
                     <MenuItem Header="_Add File" Name="addFile" Click="addFile_Click" />
+                    <MenuItem Header="_Remove selected file" Name="removeFile" Click="menuRemovefile_Click" />
                 </MenuItem>
             </Menu>
         </DockPanel>
-        <ListView ItemsSource="{Binding Source={StaticResource FileListData}}" Grid.Row="1" Drop="ListView_Drop" AllowDrop="True">
+        <ListView Name="FileContainer" ItemsSource="{Binding Source={StaticResource FileListData}}" Grid.Row="1" Drop="ListView_Drop" AllowDrop="True">
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Remove" Name="contextremoveFile" Click="menuRemovefile_Click" />
+                </ContextMenu>
+            </ListView.ContextMenu>
             <ListView.View>
                 <GridView AllowsColumnReorder="True"
                           ColumnHeaderToolTip="Files">

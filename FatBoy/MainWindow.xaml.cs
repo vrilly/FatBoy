@@ -56,7 +56,7 @@ namespace FatBoy
 
             string filename = Path.GetFileNameWithoutExtension(path);
             string ext = System.IO.Path.GetExtension(path);
-            string basename = filename.PadRight(8).Substring(0, 8) + ext.PadRight(4).Substring(1, 3);
+            string basename = filename.ToUpper().PadRight(8).Substring(0, 8) + ext.ToUpper().PadRight(4).Substring(1, 3);
             FileInfo info = new FileInfo(path);
             if (totalBytesUsed + info.Length >= 1464320)
             {
@@ -90,5 +90,16 @@ namespace FatBoy
         }
 
         private void exitButton_Click(object sender, RoutedEventArgs e) => this.Close();
+
+        private void menuRemovefile_Click(object sender, RoutedEventArgs e)
+        {
+            FileList list = (FileList)FindResource("FileListData");
+            ListView listView = (ListView)FindName("FileContainer");
+            if (listView.SelectedIndex == -1)
+                return;
+            totalBytesUsed -= ((FileObject)listView.SelectedItem).FileSizeRaw;
+            list.Remove((FileObject)listView.SelectedItem);
+            updateStorage();
+        }
     }
 }

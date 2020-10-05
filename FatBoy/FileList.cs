@@ -18,6 +18,8 @@ namespace FatBoy
 
         public string FileSize => (fileSize / 1000.0f).ToString() + "KB";
 
+        public int FileSizeRaw => fileSize;
+
         public Fat.FatFile FatFile => new Fat.FatFile(FileName, fileSize, filePath);
     }
     public class FileList : ObservableCollection<FileObject>
