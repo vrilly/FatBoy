@@ -37,43 +37,43 @@ namespace FatBoy
         public class FatFile
         {
             public uint[] clusters;
-            public HeaderObject file_name = new HeaderObject(0x0); // File name + ext
-            public HeaderObject file_attr = new HeaderObject(0xB); // File attributes
-            public HeaderObject first_cluster = new HeaderObject(0x1A); // First cluster
-            public HeaderObject file_size = new HeaderObject(0x1C); // File size
-            public string file_path; // Path to file on host system
+            public HeaderObject fileName = new HeaderObject(0x0); // File name + ext
+            public HeaderObject fileAttr = new HeaderObject(0xB); // File attributes
+            public HeaderObject firstCluster = new HeaderObject(0x1A); // First cluster
+            public HeaderObject fileSize = new HeaderObject(0x1C); // File size
+            public string filePath; // Path to file on host system
             public FatFile(string fileName)
             {
-                file_name.data = Encoding.ASCII.GetBytes(String.Format("{0,-11}", fileName));
+                this.fileName.data = Encoding.ASCII.GetBytes(string.Format("{0,-11}", fileName));
             }
 
             public FatFile(string fileName, int fileSize, string path)
             {
-                file_name.data = Encoding.ASCII.GetBytes(fileName);
-                file_size.data = BitConverter.GetBytes(fileSize);
-                file_path = path;
+                this.fileName.data = Encoding.ASCII.GetBytes(fileName);
+                this.fileSize.data = BitConverter.GetBytes(fileSize);
+                filePath = path;
             }
 
             public static FatFile CreateVolLabel(string label)
             {
                 FatFile volLabel = new FatFile(label);
-                volLabel.file_attr.data = new byte[] { 0x08 };
+                volLabel.fileAttr.data = new byte[] { 0x08 };
                 return volLabel;
             }
 
             public void writeDirent(Stream fStream, long offset)
             {
-                file_name.write(fStream, offset);
-                file_attr.write(fStream, offset);
-                first_cluster.write(fStream, offset);
-                file_size.write(fStream, offset);
+                fileName.write(fStream, offset);
+                fileAttr.write(fStream, offset);
+                firstCluster.write(fStream, offset);
+                fileSize.write(fStream, offset);
             }
             public void writeFileToImage(Stream fStream)
             {
                 long offset = 0x2600; // Offset to first cluster
                 offset += 512; //rootdir sector
                 offset += 16384 * (clusters[0] - 2);
-                FileStream inStream = File.OpenRead(file_path);
+                FileStream inStream = File.OpenRead(filePath);
                 fStream.Seek(offset, SeekOrigin.Begin);
                 byte[] buffer = new byte[inStream.Length];
                 inStream.Read(buffer);
@@ -86,7 +86,7 @@ namespace FatBoy
         {
             uint next_free = 2;
             int bytes_per_cluster = 16384;
-            HeaderObject fat_id = new HeaderObject(0, new byte[] { 0xF0, 0xFF, 0xFF });
+            HeaderObject fatId = new HeaderObject(0, new byte[] { 0xF0, 0xFF, 0xFF });
             FatFile[] files;
             byte[] cluster_map_pair = new byte[3];
 
@@ -95,8 +95,8 @@ namespace FatBoy
                 foreach (FatFile file in files)
                 {
                     List<uint> clusters = new List<uint>();
-                    uint cluster_amount = (uint)(BitConverter.ToInt32(file.file_size.data) / bytes_per_cluster) + 1;
-                    file.first_cluster.data = BitConverter.GetBytes((short)next_free);
+                    uint cluster_amount = (uint)(BitConverter.ToInt32(file.fileSize.data) / bytes_per_cluster) + 1;
+                    file.firstCluster.data = BitConverter.GetBytes((short)next_free);
                     for (uint i = 0; i < cluster_amount; i++)
                     {
                         clusters.Add(next_free + i);
@@ -114,7 +114,7 @@ namespace FatBoy
 
             void writeFAT(Stream fStream, long offset)
             {
-                fat_id.write(fStream, offset);
+                fatId.write(fStream, offset);
                 bool half = false;
                 foreach (FatFile file in files)
                 {
