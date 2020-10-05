@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Dynamic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
-using System.Windows.Documents;
 
 namespace FatBoy
 {
@@ -25,11 +21,14 @@ namespace FatBoy
             this.offset = offset;
         }
 
-        public void write(ref Stream fStream, long baseOffset = 0)
+        public void write(Stream fStream, long baseOffset = 0)
         {
-            if (this.data == null)
+            if (data == null)
+            {
                 return;
-            fStream.Seek(baseOffset + this.offset, SeekOrigin.Begin);
+            }
+
+            fStream.Seek(baseOffset + offset, SeekOrigin.Begin);
             fStream.Write(data);
         }
     }
@@ -45,7 +44,7 @@ namespace FatBoy
             public string file_path; // Path to file on host system
             public FatFile(string fileName)
             {
-                this.file_name.data = Encoding.ASCII.GetBytes(String.Format("{0,-11}", fileName));
+                file_name.data = Encoding.ASCII.GetBytes(String.Format("{0,-11}", fileName));
             }
 
             public FatFile(string fileName, int fileSize, string path)
@@ -62,19 +61,19 @@ namespace FatBoy
                 return volLabel;
             }
 
-            public void writeDirent(ref Stream fStream, long offset)
+            public void writeDirent(Stream fStream, long offset)
             {
-                file_name.write(ref fStream, offset);
-                file_attr.write(ref fStream, offset);
-                first_cluster.write(ref fStream, offset);
-                file_size.write(ref fStream, offset);
+                file_name.write(fStream, offset);
+                file_attr.write(fStream, offset);
+                first_cluster.write(fStream, offset);
+                file_size.write(fStream, offset);
             }
             public void writeFileToImage(Stream fStream)
             {
                 long offset = 0x2600; // Offset to first cluster
                 offset += 512; //rootdir sector
-                offset += 16384 * (this.clusters[0] - 2);
-                FileStream inStream = File.OpenRead(this.file_path);
+                offset += 16384 * (clusters[0] - 2);
+                FileStream inStream = File.OpenRead(file_path);
                 fStream.Seek(offset, SeekOrigin.Begin);
                 byte[] buffer = new byte[inStream.Length];
                 inStream.Read(buffer);
@@ -92,14 +91,17 @@ namespace FatBoy
             byte[] cluster_map_pair = new byte[3];
 
             public ClusterMap(FatFile[] files)
-            { 
+            {
                 foreach (FatFile file in files)
                 {
                     List<uint> clusters = new List<uint>();
                     uint cluster_amount = (uint)(BitConverter.ToInt32(file.file_size.data) / bytes_per_cluster) + 1;
                     file.first_cluster.data = BitConverter.GetBytes((short)next_free);
                     for (uint i = 0; i < cluster_amount; i++)
+                    {
                         clusters.Add(next_free + i);
+                    }
+
                     next_free += cluster_amount;
                     file.clusters = clusters.ToArray();
                     Debug.Assert(next_free < 90);
@@ -109,7 +111,7 @@ namespace FatBoy
 
             void writeFAT(Stream fStream, long offset)
             {
-                fat_id.write(ref fStream, offset);
+                fat_id.write(fStream, offset);
                 bool half = false;
                 foreach (FatFile file in files)
                 {
@@ -136,9 +138,11 @@ namespace FatBoy
                     }
                 }
                 if (half)
+                {
                     fStream.Write(cluster_map_pair);
+                }
             }
-            public void write(ref Stream fStream)
+            public void write(Stream fStream)
             {
                 writeFAT(fStream, 512);
                 writeFAT(fStream, 10 * 512);
@@ -153,13 +157,13 @@ namespace FatBoy
             {
                 files = fatFiles;
             }
-            public void write(ref Stream fStream, long offset)
+            public void write(Stream fStream, long offset)
             {
-                vollabel.writeDirent(ref fStream, offset);
+                vollabel.writeDirent(fStream, offset);
                 offset += 32;
                 foreach (FatFile file in files)
                 {
-                    file.writeDirent(ref fStream, offset);
+                    file.writeDirent(fStream, offset);
                     offset += 32;
                 }
             }
@@ -185,7 +189,8 @@ namespace FatBoy
         ClusterMap clusterMap; // FAT
         DirectoryTable directoryTable; // Root table
         Stream imageFile;
-        public Fat(ref Stream imageFile) {
+        public Fat(Stream imageFile)
+        {
             files = new List<FatFile>();
             this.imageFile = imageFile;
         }
@@ -194,15 +199,20 @@ namespace FatBoy
         public void writeImage()
         {
             foreach (HeaderObject element in VolumeBootRecord)
-                element.write(ref imageFile);
+            {
+                element.write(imageFile);
+            }
+
             clusterMap = new ClusterMap(files.ToArray());
             directoryTable = new DirectoryTable(files.ToArray());
-            clusterMap.write(ref imageFile);
-            directoryTable.write(ref imageFile, 0x2600);
+            clusterMap.write(imageFile);
+            directoryTable.write(imageFile, 0x2600);
             imageFile.Seek((2880 * 512) - 1, SeekOrigin.Begin);
             imageFile.WriteByte(0x00);
             foreach (FatFile file in files)
+            {
                 file.writeFileToImage(imageFile);
+            }
         }
     }
 }
