@@ -46,30 +46,35 @@ namespace FatBoy
             textBlock.Text = totalBytesUsed / 1000 + " / 1464 KB Used.";
         }
 
-        private void ListView_Drop(object sender, DragEventArgs e)
+        private void addFile(string path)
         {
             FileList list = (FileList)FindResource("FileListData");
+            if (Path.HasExtension(path) == false || list.Count >= 15)
+            {
+                return;
+            }
+
+            string filename = Path.GetFileNameWithoutExtension(path);
+            string ext = System.IO.Path.GetExtension(path);
+            string basename = filename.PadRight(8).Substring(0, 8) + ext.PadRight(4).Substring(1, 3);
+            FileInfo info = new FileInfo(path);
+            if (totalBytesUsed + info.Length >= 1464320)
+            {
+                return;
+            }
+            list.Add(new FileObject(basename, (int)info.Length, path));
+            totalBytesUsed += (int)info.Length;
+            updateStorage();
+        }
+
+        private void ListView_Drop(object sender, DragEventArgs e)
+        {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 string[] dropped = (string[])e.Data.GetData(DataFormats.FileDrop);
-                foreach (string drop in dropped)
+                foreach (string path in dropped)
                 {
-                    if (Path.HasExtension(drop) == false || list.Count >= 15)
-                    {
-                        continue;
-                    }
-
-                    string filename = Path.GetFileNameWithoutExtension(drop);
-                    string ext = System.IO.Path.GetExtension(drop);
-                    string basename = filename.PadRight(8).Substring(0, 8) + ext.PadRight(4).Substring(1, 3);
-                    FileInfo info = new FileInfo(drop);
-                    if (totalBytesUsed + info.Length >= 1464320)
-                    {
-                        continue;
-                    }
-                    list.Add(new FileObject(basename, (int)info.Length, drop));
-                    totalBytesUsed += (int)info.Length;
-                    updateStorage();
+                    addFile(path);
                 }
             }
         }
