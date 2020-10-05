@@ -18,6 +18,7 @@
         <DockPanel VerticalAlignment="Top" Grid.Row="0">
             <Menu Background="Beige">
                 <MenuItem Header="_File">
+                    <MenuItem Header="_New File" Name="newFile" Click="newFile_Click" />
                     <MenuItem Header="_Save Image" Name="saveImage" Click="saveImage_Click" />
                     <Separator />
                     <MenuItem Header="E_xit" Name="ExitButton" Click="exitButton_Click" />

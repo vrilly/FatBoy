@@ -85,11 +85,13 @@ namespace FatBoy
             openFileDialog.Filter = "All Files (*.*)|*.*";
             openFileDialog.Multiselect = true;
             if (openFileDialog.ShowDialog() == true)
+            {
                 foreach (string path in openFileDialog.FileNames)
                     appendFileToList(path);
+            }
         }
 
-        private void exitButton_Click(object sender, RoutedEventArgs e) => this.Close();
+        private void exitButton_Click(object sender, RoutedEventArgs e) => Close();
 
         private void menuRemovefile_Click(object sender, RoutedEventArgs e)
         {
@@ -99,6 +101,14 @@ namespace FatBoy
                 return;
             totalBytesUsed -= ((FileObject)listView.SelectedItem).FileSizeRaw;
             list.Remove((FileObject)listView.SelectedItem);
+            updateStorage();
+        }
+
+        private void newFile_Click(object sender, RoutedEventArgs e)
+        {
+            FileList list = (FileList)FindResource("FileListData");
+            list.Clear();
+            totalBytesUsed = 0;
             updateStorage();
         }
     }
