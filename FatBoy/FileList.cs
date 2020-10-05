@@ -16,7 +16,7 @@ namespace FatBoy
 
         public string FileName { get; set; }
 
-        public string FileSize => fileSize.ToString();
+        public string FileSize => (fileSize / 1000.0f).ToString() + "KB";
 
         public Fat.FatFile FatFile => new Fat.FatFile(FileName, fileSize, filePath);
     }

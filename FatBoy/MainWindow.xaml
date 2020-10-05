@@ -5,15 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FatBoy"
         mc:Ignorable="d"
-        Title="FatBoy" Height="450" Width="800">
+        Title="FatBoy" Height="300" Width="250">
     <Window.Resources>
         <local:FileList x:Key="FileListData" />
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="20"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="*" />
-            <RowDefinition Height="20" />
+            <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
         <DockPanel VerticalAlignment="Top" Grid.Row="0">
             <Menu Background="Beige">
@@ -39,7 +39,7 @@
         </ListView>
         <StatusBar Name="sbar" VerticalAlignment="Bottom" Background="Beige" Grid.Row="2">
             <StatusBarItem>
-                <TextBlock>Idle.</TextBlock>
+                <TextBlock x:Name="uistatus">Empty image</TextBlock>
             </StatusBarItem>
         </StatusBar>
     </Grid>

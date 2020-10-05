@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using Path = System.IO.Path;
 
 namespace FatBoy
@@ -11,6 +12,8 @@ namespace FatBoy
     /// </summary>
     public partial class MainWindow : Window
     {
+
+        int totalBytesUsed = 0;
         public MainWindow()
         {
             InitializeComponent();
@@ -37,6 +40,12 @@ namespace FatBoy
             }
         }
 
+        private void updateStorage()
+        {
+            TextBlock textBlock = (TextBlock)FindName("uistatus");
+            textBlock.Text = totalBytesUsed / 1000 + " / 1464 KB Used.";
+        }
+
         private void ListView_Drop(object sender, DragEventArgs e)
         {
             FileList list = (FileList)FindResource("FileListData");
@@ -45,7 +54,7 @@ namespace FatBoy
                 string[] dropped = (string[])e.Data.GetData(DataFormats.FileDrop);
                 foreach (string drop in dropped)
                 {
-                    if (Path.HasExtension(drop) == false)
+                    if (Path.HasExtension(drop) == false || list.Count >= 15)
                     {
                         continue;
                     }
@@ -54,7 +63,13 @@ namespace FatBoy
                     string ext = System.IO.Path.GetExtension(drop);
                     string basename = filename.PadRight(8).Substring(0, 8) + ext.PadRight(4).Substring(1, 3);
                     FileInfo info = new FileInfo(drop);
+                    if (totalBytesUsed + info.Length >= 1464320)
+                    {
+                        continue;
+                    }
                     list.Add(new FileObject(basename, (int)info.Length, drop));
+                    totalBytesUsed += (int)info.Length;
+                    updateStorage();
                 }
             }
         }

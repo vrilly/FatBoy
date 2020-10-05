@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Windows;
 
 namespace FatBoy
 {
@@ -104,7 +104,10 @@ namespace FatBoy
 
                     next_free += cluster_amount;
                     file.clusters = clusters.ToArray();
-                    Debug.Assert(next_free < 90);
+                    if (next_free > 90)
+                    {
+                        MessageBox.Show("Critical: Ran out of clusters.");
+                    }
                 }
                 this.files = files;
             }
