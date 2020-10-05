@@ -20,7 +20,10 @@
                 <MenuItem Header="_File">
                     <MenuItem Header="_Save Image" Name="saveImage" Click="saveImage_Click" />
                     <Separator />
-                    <MenuItem Header="E_xit" Command="ApplicationCommands.Close" />
+                    <MenuItem Header="E_xit" Name="ExitButton" Click="exitButton_Click" />
+                </MenuItem>
+                <MenuItem Header="_Image">
+                    <MenuItem Header="_Add File" Name="addFile" Click="addFile_Click" />
                 </MenuItem>
             </Menu>
         </DockPanel>

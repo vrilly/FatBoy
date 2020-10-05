@@ -46,7 +46,7 @@ namespace FatBoy
             textBlock.Text = totalBytesUsed / 1000 + " / 1464 KB Used.";
         }
 
-        private void addFile(string path)
+        private void appendFileToList(string path)
         {
             FileList list = (FileList)FindResource("FileListData");
             if (Path.HasExtension(path) == false || list.Count >= 15)
@@ -74,9 +74,21 @@ namespace FatBoy
                 string[] dropped = (string[])e.Data.GetData(DataFormats.FileDrop);
                 foreach (string path in dropped)
                 {
-                    addFile(path);
+                    appendFileToList(path);
                 }
             }
         }
+
+        private void addFile_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "All Files (*.*)|*.*";
+            openFileDialog.Multiselect = true;
+            if (openFileDialog.ShowDialog() == true)
+                foreach (string path in openFileDialog.FileNames)
+                    appendFileToList(path);
+        }
+
+        private void exitButton_Click(object sender, RoutedEventArgs e) => this.Close();
     }
 }
